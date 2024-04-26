@@ -1,16 +1,15 @@
 import requests
-import os
 import csv
-import threading
+import concurrent.futures
 
 from sys import stderr
 from datetime import datetime
+from pathlib import Path
 
 from src.Models.Todo import Todo
 
-
 API_ENDPOINT = "https://jsonplaceholder.typicode.com/todos/"
-STORAGE_FOLDER_PATH = "./storage"
+STORAGE_FOLDER = Path("./storage")
 
 
 class ApiService:
@@ -18,12 +17,12 @@ class ApiService:
         pass
 
     def run(self):
-        print('Running ApiService')
+        print('Running ApiService', file=stderr)
         todos = self.fetch_todos()
         self.process_write_threaded(todos)
         print('ApiService runned successfully')
 
-    def fetch_todos(self):
+    def fetch_todos(self) -> list[Todo]:
         response = requests.get(API_ENDPOINT)
         response.raise_for_status()
         todos = response.json()
@@ -31,29 +30,32 @@ class ApiService:
 
     def process_write_threaded(self, todos: list[Todo]):
         """ Multi threading isn't really necessary here, but it still offers
-        a nice perfmance improvment in relative terms"""
-        threads = []
-        for todo in todos:
-            thread = threading.Thread(target=self.write_to_csv, args=(todo,))
-            thread.start()
-            threads.append(thread)
-        for thread in threads:
-            thread.join()
+        a significant performance improvment"""
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            futures = [
+                executor.submit(self.write_to_csv, todo) for todo in todos
+            ]
+            self.handle_futures(futures)
 
     def write_to_csv(self, todo: Todo):
         fields = todo.model_fields.keys()
         fname = self.get_file_name(todo.id)
-        fpath = os.path.join(STORAGE_FOLDER_PATH,  fname)
-        test = STORAGE_FOLDER_PATH / fname
-        print(test)
+        fpath = STORAGE_FOLDER / fname
         try:
             with open(fpath, "w", newline="") as csvf:
                 writer = csv.DictWriter(csvf, fieldnames=fields)
                 writer.writeheader()
                 writer.writerow(todo.model_dump())
         except IOError as e:
-            print(f"Error writing to CSV: {e}", file=stderr)
+            print(f"Error writing to CSV: {e}, File: {fpath}", file=stderr)
 
     def get_file_name(self, id: int) -> str:
         date = datetime.now().strftime('%Y_%m_%d')
         return f"{date}_{id}.csv"
+
+    def handle_futures(self, futures: list):
+        for future in concurrent.futures.as_completed(futures):
+            try:
+                future.result()
+            except Exception as e:
+                print(f"Error: {e}", file=stderr)

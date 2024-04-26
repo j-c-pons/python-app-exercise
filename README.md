@@ -7,7 +7,7 @@
 ```
 cd <Your_path>/python-app-exercise
 python -m venv env
-env\Scripts\activate (Windows), env/bin/activate (Unix, MacOS)
+env\Scripts\activate (Windows)/ env/bin/activate (Unix, MacOS)
 pip install -r requirements.txt
 ```
 
@@ -17,10 +17,10 @@ pip install -r requirements.txt
 python main.py
 ```
 
-## Testing
+# Testing
 
 ```
-python -m unittest tests/ApiServiceTest.py
+python -m unittest tests/test_api_service.py
 ```
 
 ## Exercise
