@@ -2,7 +2,7 @@
 
 ## App setup
 
-# Virtual environment
+### Virtual environment
 
 ```
 cd <Your_path>/python-app-exercise
@@ -11,13 +11,13 @@ env\Scripts\activate (Windows)/ env/bin/activate (Unix, MacOS)
 pip install -r requirements.txt
 ```
 
-# Main script
+### Main script
 
 ```
 python main.py
 ```
 
-# Testing
+### Testing
 
 ```
 python -m unittest tests/test_api_service.py
