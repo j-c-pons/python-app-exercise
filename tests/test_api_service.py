@@ -57,11 +57,11 @@ class TestApiService(unittest.TestCase):
         with self.assertRaises(ValidationError):
             self.api_service.fetch_todos()
 
-    def test_process_write_threaded(self):
+    def test_process_write_threads(self):
         with patch.object(self.api_service, 'write_to_csv', MagicMock()):
             mocked_todos = [MagicMock() for _ in range(5)]
 
-            self.api_service.process_write_threaded(mocked_todos)
+            self.api_service.process_write_threads(mocked_todos)
 
             # Assert that write_to_csv was called once for each Todo object
             self.assertEqual(

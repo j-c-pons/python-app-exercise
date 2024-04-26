@@ -19,7 +19,7 @@ class ApiService:
     def run(self):
         print('Running ApiService', file=stderr)
         todos = self.fetch_todos()
-        self.process_write_threaded(todos)
+        self.process_write_threads(todos)
         print('ApiService runned successfully')
 
     def fetch_todos(self) -> list[Todo]:
@@ -28,7 +28,7 @@ class ApiService:
         todos = response.json()
         return [Todo(**todo) for todo in todos]
 
-    def process_write_threaded(self, todos: list[Todo]):
+    def process_write_threads(self, todos: list[Todo]):
         """ Multi threading isn't really necessary here, but it still offers
         a significant performance improvment"""
         with concurrent.futures.ThreadPoolExecutor() as executor:
